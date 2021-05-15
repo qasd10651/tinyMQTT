@@ -19,7 +19,7 @@ The version of tinyMQTT on Espruino.com will always be a recent version, but may
 
 To get the latest version of tinyMQTT, you can require the file directly from this respository. For example, this works:
 
-```
+```js
 var mqtt = require("https://github.com/olliephillips/tinyMQTT/blob/master/tinyMQTT.min.js").create("<your mqtt broker>");
 ```
 
@@ -114,7 +114,7 @@ var mqtt = require("tinyMQTT-C").create("test.mosquitto.org");
 
 Espruino supports saving and loading modules directly to/from storage. tinyMQTT can be used in this way, which provides for further memory optimisation should it be needed.
 
-```
+```js
 // Save to Storage 
 
 var s = require('Storage');
