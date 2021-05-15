@@ -11,7 +11,7 @@ Stripped out JavaScript MQTT module that does basic PUB/SUB. Minifies to 1.42KB,
 
 tinyMQTT is now hosted on Espruino.com, so using the Espruino Web IDE it can be required as follows:
 
-```
+```js
 var mqtt = require("tinyMQTT").create("<your mqtt broker>");
 ```
 
@@ -27,13 +27,13 @@ You can also download the file and use as a local module, which is ideal if you 
 
 ### No config options
 
-```
+```js
 var mqtt = require("tinyMQTT").create(server);
 mqtt.connect(); // Connects on default port of 1883
 ```
 ### With config options
 
-```
+```js
 var mqtt = require("tinyMQTT").create(server, {
 	username: "username",
 	password: "password",
@@ -44,7 +44,7 @@ mqtt.connect();
 
 ## Example
 
-```
+```js
 var mqtt = require("tinyMQTT").create("test.mosquitto.org");
 
 mqtt.on("connected", function(){
@@ -65,8 +65,16 @@ mqtt.on("disconnected", function(){
 });
 
 var wifi = require("Wifi");
-wifi.connect("username", {password:"mypassword"},function(){
-	mqtt.connect();
+wifi.connect("mySSID", {password:"mypassword"}, function(e) {
+  if (e) {
+    console.log('error during connect:',e);
+    wifi.disconnect();
+  } else {
+    console.log('connected to',ssid);
+    wifi.stopAP();
+    //wifi.save();
+    mqtt.connect();
+  }
 });
 ```
 
@@ -74,7 +82,7 @@ wifi.connect("username", {password:"mypassword"},function(){
 
 If you want to reconnect in event of broker disconnection or wifi outage add ```mqtt.connect();``` to the disconnected event listener. Reconnection will be attempted indefinitely, by default at 2 second intervals (though this can be configured). Once reconnected publishing should restart, and subscriptions will be honoured.
 
-```
+```js
 mqtt.on("disconnected", function(){
 	console.log("disconnected");
 	mqtt.connect();
@@ -85,6 +93,22 @@ mqtt.on("disconnected", function(){
 ## Too long message
 
 tinyMQTT only supports short messages. The length of the topic plus the length of the payload must be less than 128 characters. If it's longer, the library throws a `tMQTT-TL` exception.
+
+## Add to cache for testing and debugging 
+
+Using `Modules.addCached()`  gives the posiblity to pierce it with console.log().
+
+```js
+Modules.addCached("tinyMQTT-C", function() {
+	//... copy tinyMQTT.js code here ...
+});	
+
+// load module from cache
+var mqtt = require("tinyMQTT-C").create("test.mosquitto.org");
+
+// add further lines from example 
+
+```
 
 ## Save & load from Storage
 
