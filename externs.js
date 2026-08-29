@@ -13,3 +13,4 @@ Object.prototype.subscribe;
 Object.prototype.publish;
 Object.prototype.disconnect;
 Object.prototype.create;
+Object.prototype.setup;

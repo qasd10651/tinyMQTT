@@ -14,18 +14,10 @@
 (function() {
     var _q,
         TMQ = function(server, optns) {
-            var opts = optns || {};
             _q = this;
-            _q.svr = server;
-            _q.prt = opts.port || 1883;
-            _q.ka = opts.keep_alive || 60;
-            _q.usr = opts.username;
-            _q.pwd = opts.password;
             _q.cn = 0;
-            _q.ri = opts.reconnect_interval || 2000;
-            _q.wt = opts.will_topic;
-            _q.wp = opts.will_payload || "";
             _q.partData = "";
+            _q.setup(server, optns);
         },
         p = TMQ.prototype,
 
@@ -114,6 +106,18 @@
         _q.partData = "";
         delete _q.cl;
         _q.emit("disconnected");
+    };
+
+    p.setup = (server, optns) => {
+        var opts = optns || {};
+        if (server) _q.svr = server;
+        _q.prt = opts.port || _q.prt || 1883;
+        _q.ka = opts.keep_alive || _q.ka || 60;
+        _q.usr = opts.username || _q.usr;
+        _q.pwd = opts.password || _q.pwd;
+        _q.ri = opts.reconnect_interval || _q.ri || 2000;
+        _q.wt = opts.will_topic || _q.wt;
+        _q.wp = opts.will_payload || _q.wp || "";
     };
 
     p.connect = () => {
