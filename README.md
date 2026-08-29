@@ -1,5 +1,12 @@
 # tinyMQTT
 
+
+> `google-closure-compiler` use command:
+> ```shell
+> npx google-closure-compiler  --js tinyMQTT.js  --externs externs.js  --js_output_file tinyMQTT.min.js  --compilation_level ADVANCED_OPTIMIZATIONS  --language_out ECMASCRIPT_2015
+> ```
+
+
 Stripped out JavaScript MQTT module that does basic PUB/SUB. Minifies to 1.42KB, intended for devices running Espruino, particularly the ESP8266, but works's for all other too.
 
 - Supports QoS 0 only.
