@@ -25,6 +25,7 @@
             _q.ri = opts.reconnect_interval || 2000;
             _q.wt = opts.will_topic;
             _q.wp = opts.will_payload || "";
+            _q.partData = "";
         },
         p = TMQ.prototype,
 
@@ -35,23 +36,45 @@
         sS = (d, o, l) => d.substr(o, l),
 
         onDat = (data) => {
-            if (cCa(data, 0) >> 4 === 3) {
-                var mult = 1, packet_len = 0, idx = 1, encByte, data_len = data.length;
-                do {
-                    encByte = cCa(data, idx++);
-                    packet_len += (encByte & 127) * mult;
-                    mult *= 128;
-                } while ((encByte & 128) !== 0);
+            if (_q.partData) {
+                data = _q.partData + data;
+                _q.partData = "";
+            }
 
+            var data_len = data.length;
+            if (data_len < 2) { 
+                _q.partData = data; 
+                return; 
+            }
+
+            var mult = 1, packet_len = 0, idx = 1, encByte;
+            do {
+                if (idx >= data_len) { 
+                    _q.partData = data;
+                    return; 
+                }
+                encByte = cCa(data, idx++);
+                packet_len += (encByte & 127) * mult;
+                mult *= 128;
+            } while ((encByte & 128) !== 0);
+
+            var total_len = idx + packet_len;
+
+            if (data_len < total_len) {
+                _q.partData = data;
+                return;
+            }
+
+            if (cCa(data, 0) >> 4 === 3) {
                 var var_len = (cCa(data, idx) << 8) | cCa(data, idx + 1);
                 _q.emit("message", {
                     "topic": sS(data, idx + 2, var_len),
                     "message": sS(data, idx + 2 + var_len, packet_len - var_len - 2)
                 });
-                
-                var consumed_len = idx + packet_len;
-                if (data_len > consumed_len)
-                    onDat(sS(data, consumed_len, data_len - consumed_len));
+            }
+
+            if (data_len > total_len) {
+                onDat(sS(data, total_len, data_len - total_len));
             }
         },
 
@@ -61,7 +84,7 @@
 
         mqCon = (id) => {
             // Authentication?
-            var flags = 0,
+            var flags = 0x02,
                 payload = mqStr(id);
             if (_q.wt) {
                 flags |= 0x24; /*will retain + will flag*/
@@ -88,6 +111,7 @@
         _q.con = cI(_q.con);
         _q.x1 = cI(_q.x1);
         _q.cn = 0;
+        _q.partData = "";
         delete _q.cl;
         _q.emit("disconnected");
     };
