@@ -36,15 +36,22 @@
 
         onDat = (data) => {
             if (cCa(data, 0) >> 4 === 3) {
-                var data_len = data.length,
-                    packet_len = cCa(data, 1),
-                    var_len = (cCa(data, 2) << 8) | cCa(data, 3);
+                var mult = 1, packet_len = 0, idx = 1, encByte, data_len = data.length;
+                do {
+                    encByte = cCa(data, idx++);
+                    packet_len += (encByte & 127) * mult;
+                    mult *= 128;
+                } while ((encByte & 128) !== 0);
+
+                var var_len = (cCa(data, idx) << 8) | cCa(data, idx + 1);
                 _q.emit("message", {
-                    topic: sS(data, 4, var_len),
-                    message: sS(data, 4 + var_len, packet_len - var_len - 2)
+                    topic: sS(data, idx + 2, var_len),
+                    message: sS(data, idx + 2 + var_len, packet_len - var_len - 2)
                 });
-                if (data_len > packet_len + 2)
-                    onDat(sS(data, packet_len + 2, data_len - packet_len));
+                
+                var consumed_len = idx + packet_len;
+                if (data_len > consumed_len)
+                    onDat(sS(data, consumed_len, data_len - consumed_len));
             }
         },
 
