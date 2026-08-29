@@ -45,8 +45,8 @@
 
                 var var_len = (cCa(data, idx) << 8) | cCa(data, idx + 1);
                 _q.emit("message", {
-                    topic: sS(data, idx + 2, var_len),
-                    message: sS(data, idx + 2 + var_len, packet_len - var_len - 2)
+                    "topic": sS(data, idx + 2, var_len),
+                    "message": sS(data, idx + 2 + var_len, packet_len - var_len - 2)
                 });
                 
                 var consumed_len = idx + packet_len;
